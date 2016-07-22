@@ -22,27 +22,30 @@ module.exports = function(robot) {
     var request = require('request'),
     _ = require('lodash'),
     client_id = process.env.DOMAINR_CLIENT_ID,
-    api_url = 'https://domainr.com/api/json/search?client_id=' + client_id + '&q=';
+    api_url = 'https://domainr.p.mashape.com/v2/status?mashape-key=' + client_id + '&domain=';
 
-    robot.respond(/(dmnr|domainr)(.*)/i, function(msg) {
+    robot.respond(/(check domain)(.*)/i, function(msg) {
 
         var search_term =  msg.match[2].trim();
-	if(search_term.startsWith('http://')){
-	    search_term = search_term.replace('http://', '');
-	}
+        search_term = search_term.replace('http://', '');
 
         request(api_url + search_term, function (error, response, body) {
-
             if(!error && response.statusCode == 200) {
 
                 var data = JSON.parse(body);
                 var reply = '';
 
-                _.each(data.results, function(result) {
-                    reply += result.domain + ' - ' + result.availability + '\n';
+                _.each(data.status, function(result) {
+                    if(result.summary === 'inactive'){
+                        reply += result.domain + ' is available !\n';
+                    }
+                    else if(result.summary === 'active'){
+                        reply += result.domain + ' is already taken.\n';
+                    }
+
                 });
 
-                msg.reply(reply);
+                msg.send(reply);
 
             } else {
 
