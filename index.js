@@ -27,6 +27,9 @@ module.exports = function(robot) {
     robot.respond(/(dmnr|domainr)(.*)/i, function(msg) {
 
         var search_term =  msg.match[2].trim();
+	if(search_term.startsWith('http://')){
+	    search_term = search_term.replace('http://', '');
+	}
 
         request(api_url + search_term, function (error, response, body) {
 
